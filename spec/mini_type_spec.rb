@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-include MiniType
+class TestClass
+  include MiniType
+end
 
 RSpec.describe MiniType do
   describe "VERSION" do
@@ -10,47 +12,49 @@ RSpec.describe MiniType do
   end
 
   describe "#accepts" do
-    it "does not raise an error when local variables match declaratios" do
-      expect {
-        param1 = "foo"
-        param2 = 1234
+    it "works correctly in an instance method" do
+      instance = TestClass.new
 
+      def instance.test(param1)
+        accepts { {param1: String} }
+      end
+
+      expect { instance.test("foo") }.not_to raise_error
+    end
+  end
+
+  describe ".accepts" do
+    it "does not raise an error when local variables match declarations" do
+      def TestClass.test(param1, param2)
         accepts { {param1: String, param2: Integer} }
-      }.not_to raise_error
+      end
+
+      expect { TestClass.test("foo", 1) }.not_to raise_error
     end
 
-    it "does not raise an error when local variables match first option of union declaration" do
-      expect {
-        param1 = "foo"
-
+    it "does not raise an error when local variables match any option of union declaration" do
+      def TestClass.test(param1)
         accepts { {param1: [String, Integer]} }
-      }.not_to raise_error
-    end
+      end
 
-    it "does not raise an error when local variables match second option of union declaration" do
-      expect {
-        param1 = 1
-
-        accepts { {param1: [String, Integer]} }
-      }.not_to raise_error
+      expect { TestClass.test("foo") }.not_to raise_error
+      expect { TestClass.test(1) }.not_to raise_error
     end
 
     it "raises an error if a variable is not declared" do
-      expect {
-        param1 = "foo"
-        param2 = 1234
-
+      def TestClass.test(param1, param2 = nil)
         accepts { {param1: String} }
-      }.to raise_error(/Undeclared argument: 'param2'/i)
+      end
+
+      expect { TestClass.test("foo") }.to raise_error(/Undeclared argument: 'param2'/i)
     end
 
     it "raises an error when local variables do not match declaration" do
-      expect {
-        param1 = "foo"
-        param2 = 1234
-
+      def TestClass.test(param1, param2)
         accepts { {param1: NilClass, param2: NilClass} }
-      }.to raise_error(IncorrectParameterType)
+      end
+
+      expect { TestClass.test("foo", 1234) }.to raise_error(MiniType::IncorrectParameterType)
     end
   end
 end
