@@ -1,6 +1,6 @@
 require "spec_helper"
 
-class TestClass
+class BenchmarkTestClass
   include MiniType
 
   def self.method_using_accepts(foo:, bar:)
@@ -31,7 +31,7 @@ RSpec.describe MiniType do
     it "benchmarks MiniType.accepts" do
       @benchmarks["typed method call using MiniType.accepts"] = Benchmark.measure do
         BENCHMARK_ITERATION_COUNT.times do |id|
-          TestClass.method_using_accepts(foo: 123, bar: "123")
+          BenchmarkTestClass.method_using_accepts(foo: 123, bar: "123")
         end
       end
     end
@@ -39,7 +39,7 @@ RSpec.describe MiniType do
     it "benchmarks insertion via raw SQL" do
       @benchmarks["un-typed method call"] = Benchmark.measure do
         BENCHMARK_ITERATION_COUNT.times do |id|
-          TestClass.bare_method(foo: 123, bar: "123")
+          BenchmarkTestClass.bare_method(foo: 123, bar: "123")
         end
       end
     end

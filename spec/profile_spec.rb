@@ -1,6 +1,6 @@
 require "spec_helper"
 
-class TestClass
+class ProfileTestClass
   include MiniType
 
   def self.typed_method(foo:, bar:, baz:)
@@ -16,7 +16,7 @@ RSpec.describe MiniType do
     it "profiles MiniType.accepts" do
       profile = RubyProf.profile do
         PROFILE_ITERATION_COUNT.times do
-          TestClass.typed_method(foo: "abc", bar: 123, baz: [1, 2, 3])
+          ProfileTestClass.typed_method(foo: "abc", bar: 123, baz: [1, 2, 3])
         end
       end
 
