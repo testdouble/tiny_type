@@ -1,3 +1,7 @@
+[![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
+[![build](https://github.com/testdouble/mini_type/actions/workflows/main.yml/badge.svg)](https://github.com/testdouble/mini_type/actions/workflows/main.yml)
+![license](https://img.shields.io/github/license/testdouble/mini_type)
+
 # MiniType
 
 MiniType is a small runtime type checking system for Ruby! MiniType does not require any setup other than installing the gem, and adding `accepts` definitions for your methods.
@@ -24,7 +28,7 @@ MiniType makes it easy to document and enforce expectations in your code:
 
 ```ruby
 def render(input)
-  accepts {{ input: [RenderableObject] }}
+  accepts {{ input: RenderableObject }}
   puts input.render_to_string
 end
 ```
