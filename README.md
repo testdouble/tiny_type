@@ -1,6 +1,39 @@
 # MiniType
 
-MiniType is a small type system written for Ruby, and written in pure Ruby! MiniType does not require any setup other than installing the gem, 
+MiniType is a small runtime type checking system for Ruby! MiniType does not require any setup other than installing the gem, and adding `accepts` definitions for your methods.
+
+## Usage
+
+MiniType is designed to help document how methods are expected to be used, as well as providing an easy way to provide runtime guarding against unexpected input. For example, given this method:
+
+```ruby
+def add_one(input)
+  input += 1
+end
+```
+
+it is easy to imagine giving this method unexpected input like a `String` or other objects. Additionally in more complex examples it might be hard to work out what the expected input actually is, for example:
+
+```ruby
+def render(input)
+  puts input.render_to_string
+end
+```
+
+MiniType makes it easy to document and enforce expectations in your code:
+
+```ruby
+def render(input)
+  accepts {{ input: [RenderableObject] }}
+  puts input.render_to_string
+end
+```
+
+now anyone working with this code can see at a glance what type of object it's expecting to be given, and if the `render` method is given anything other than a `RenderableObject` it will raise an exception with a clear error message:
+
+```
+Expected parameter ':input' to be of type 'RenderableObject', but got 'String'
+```
 
 ## Installation
 
@@ -12,9 +45,6 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
     $ gem install mini_type
 
-## Usage
-
-TODO: Write usage instructions here
 
 ## Development
 
