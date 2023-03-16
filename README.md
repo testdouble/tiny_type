@@ -4,7 +4,39 @@
 
 # MiniType
 
-MiniType is a small runtime type checking system for Ruby! MiniType does not require any setup other than installing the gem, and adding `accepts` definitions for your methods.
+MiniType is a small runtime type checking system for Ruby. MiniType does not require any setup other than installing the gem, and adding `accepts` definitions for your methods.
+
+## Quick Start
+
+```ruby
+require "mini_type"
+
+class AmazingClass
+  # include MiniType in your class
+  include MiniType
+
+  def initialize(param1, param2 = nil)
+    # param1 should only be a String
+    # param2 can be a String or `nil`
+    accepts {{ param1: String, param2: [Integer, NilClass] }}
+  end
+
+  def self.print_name(name:)
+    # works with positional arguments and with keyword arguments
+    accepts {{ name: String }}
+  end
+end
+```
+
+## Installation
+
+Install the gem and add to the application's Gemfile by executing:
+
+    $ bundle add mini_type
+
+If bundler is not being used to manage dependencies, install the gem by executing:
+
+    $ gem install mini_type
 
 ## Usage
 
@@ -39,15 +71,45 @@ now anyone working with this code can see at a glance what type of object it's e
 Expected parameter ':input' to be of type 'RenderableObject', but got 'String'
 ```
 
-## Installation
+## How it works
 
-Install the gem and add to the application's Gemfile by executing:
+The `accepts` method takes a block as the only argument, and the block should return a hash containing the local variables you want to check. This can be expressed in two ways:
 
-    $ bundle add mini_type
+```ruby
+accepts do
+  { foo: String }
+end
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+# or the preferred style:
+accepts {{ foo: String }}
 
-    $ gem install mini_type
+```
+
+In Ruby blocks capture information about the context in which they were defined. This allows us to inspect variables that were local to the block when it was defined like so:
+
+```ruby
+
+def accepts(&block)
+  context = block.binding
+  context.local_variables.each do |name|
+    puts "Name: #{name}"
+    puts "Value: #{context.local_variable_get(name).inspect}"
+  end
+end
+
+foo = 1
+bar = "abc"
+
+accepts {{ }} # block that returns empty hash
+
+# Output:
+# => Name: bar
+# => Value: "abc"
+# => Name: foo
+# => Value: 1
+```
+
+The nice thing about this is it allows `MiniType` to be implemented in a really simple way with no 'magic'! 🎉
 
 
 ## Development
