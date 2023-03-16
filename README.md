@@ -23,7 +23,7 @@ class AmazingClass
     # do some work
   end
 
-  def self.print_name(name:)
+  def print_name(name:)
     # works with positional arguments and with keyword arguments
     accepts {{ name: String }}
 
@@ -39,14 +39,14 @@ class AmazingClass
 
   def self.output_hash(hash)
     # define that a parameter is a hash that should have certain keys
-    accepts {{ thing: hash_with(:key1, :some_other_key) }}
+    accepts {{ hash: hash_with(:key1, :some_other_key) }}
 
     # use the hash
   end
 
   def self.render(thing)
     # define that a parameter must respond to a given interface
-    accepts {{ thing: with_interface(:render, :to_s) }}
+    accepts {{ thing: with_interface(:render, :foo) }}
 
     # use the interface
   end
