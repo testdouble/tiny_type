@@ -7,39 +7,29 @@ class AmazingClass
   include MiniType
 
   def initialize(param1, param2 = nil)
+    accepts { {param1: String, param2: [Integer, NilClass]} }
     # param1 should only be a String
     # param2 can be a String or `nil`
-    accepts { {param1: String, param2: [Integer, NilClass]} }
-
-    # do some work
   end
 
   def print_name(name:)
-    # works with positional arguments and with keyword arguments
     accepts { {name: String} }
-
-    # do some other work
+    # works with positional arguments and with keyword arguments
   end
 
   def self.output_array(array)
-    # allow an array filled with defined types of objects
     accepts { {array: array_of(String, NilClass)} }
-
-    # keep working
+    # allow an array filled with defined types of objects
   end
 
   def self.output_hash(hash)
-    # define that a parameter is a hash that should have certain keys
     accepts { {hash: hash_with(:key1, :some_other_key)} }
-
-    # use the hash
+    # define that a argument is a hash that should have certain keys
   end
 
   def self.render(thing)
-    # define that a parameter must respond to a given interface
     accepts { {thing: with_interface(:render, :foo)} }
-
-    # use the interface
+    # define that an argument must respond to a given interface
   end
 end
 
