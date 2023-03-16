@@ -24,6 +24,46 @@ RSpec.describe MiniType do
   end
 
   describe ".accepts" do
+    it "raises an error when given an invalid declaration" do
+      def TestClass.test(param1, param2)
+        accepts { "foo" }
+      end
+
+      expect { TestClass.test("foo", 1) }.to raise_error(/The `accepts` method expects a block that returns a hash/i)
+    end
+
+    it "raises an error when given an invalid type declaration" do
+      def TestClass.test(param1)
+        accepts { {param1: 1234} }
+      end
+
+      expect { TestClass.test("foo") }.to raise_error(/Invalid type declaration for: ':param1'/i)
+    end
+
+    it "allows using a class literal in the declaration" do
+      def TestClass.test(param1)
+        accepts { {param1: String} }
+      end
+
+      expect { TestClass.test("foo") }.not_to raise_error
+    end
+
+    it "allows using a block matcher in the declaration" do
+      def TestClass.test(param1)
+        accepts { {param1: ->(_arg_name, x) { x.is_a?(String) }} }
+      end
+
+      expect { TestClass.test("foo") }.not_to raise_error
+    end
+
+    it "allows using an array in the declaration" do
+      def TestClass.test(param1)
+        accepts { {param1: [String, NilClass]} }
+      end
+
+      expect { TestClass.test("foo") }.not_to raise_error
+    end
+
     it "does not raise an error when local variables match declarations" do
       def TestClass.test(param1, param2)
         accepts { {param1: String, param2: Integer} }
@@ -46,7 +86,7 @@ RSpec.describe MiniType do
         accepts { {param1: String} }
       end
 
-      expect { TestClass.test("foo") }.to raise_error(/Undeclared argument: 'param2'/i)
+      expect { TestClass.test("foo") }.to raise_error(/Undeclared arguments: \[:param2\]/i)
     end
 
     it "raises an error when local variables do not match declaration" do
