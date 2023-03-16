@@ -11,6 +11,9 @@ module MiniType
   INVALID_DECLARAION = "Invalid type declaration. The `accepts` method expects a block that returns a hash, like: `accepts {{ foo: String }}`. Received: '%s'"
   INVALID_TYPE = "Invalid type declaration for: ':%s'. Type declaration should be a class literal (`String`), an aray of class literals (`[String, NilClass]`), or a matcher (`array_of(String)`)."
 
+  ARRAY_OF_NOT_GIVEN_ARRAY = "Expected an array to be passed as parameter `:%s`, but got `%s`"
+  ARRAY_OF_INVALID_CONTENT = "Expected array passed as parameter `:%s` to contain only `%s`, but got `%s`"
+
   def self.included(base)
     base.extend(Methods)
     base.include(Methods)
@@ -39,6 +42,15 @@ module MiniType
           raise(IncorrectParameterType, INVALID_TYPE % [argument_name])
         end
       end
+    end
+
+    def array_of(*allowed_classes)
+      ->(argument_name, argument_value) {
+        raise(IncorrectParameterType, ARRAY_OF_NOT_GIVEN_ARRAY % [argument_name, argument_value.inspect]) unless argument_value.is_a?(Array)
+
+        actual_classes = argument_value.map(&:class).uniq
+        raise(IncorrectParameterType, ARRAY_OF_INVALID_CONTENT % [argument_name, allowed_classes, actual_classes]) unless actual_classes.map(&:name).sort == allowed_classes.map(&:name).sort
+      }
     end
   end
 end

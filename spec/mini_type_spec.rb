@@ -97,4 +97,53 @@ RSpec.describe MiniType do
       expect { TestClass.test("foo", 1234) }.to raise_error(MiniType::IncorrectParameterType)
     end
   end
+
+  describe ".array_of" do
+    it "returns a proc" do
+      result = TestClass.array_of(String, NilClass)
+      expect(result).to be_a(Proc)
+    end
+
+    describe "the returned proc" do
+      it "does not raise an error when given an array where all elements match a single allowed class" do
+        proc = TestClass.array_of(String)
+
+        expect {
+          proc.call(:foo, ["abc", "def"])
+        }.not_to raise_error
+      end
+
+      it "does not raise an error when given an array where all elements match a list of allowed class" do
+        proc = TestClass.array_of(String, NilClass, Integer)
+
+        expect {
+          proc.call(:foo, ["abc", nil, nil, 1, 2, 4])
+        }.not_to raise_error
+      end
+
+      it "raises an error when given an array where not all elements match a single allowed class" do
+        proc = TestClass.array_of(String)
+
+        expect {
+          proc.call(:foo, ["abc", :symbol, 1])
+        }.to raise_error(/Expected array passed as parameter `:foo` to contain only `\[String\]`, but got `\[String, Symbol, Integer\]`/i)
+      end
+
+      it "raises an error when given an array where not all elements match a list of allowed class" do
+        proc = TestClass.array_of(String, NilClass)
+
+        expect {
+          proc.call(:foo, ["abc", :symbol, 1, nil])
+        }.to raise_error(/Expected array passed as parameter `:foo` to contain only `\[String, NilClass\]`, but got `\[String, Symbol, Integer, NilClass\]`/i)
+      end
+
+      it "raises an error when given something other than an Array" do
+        proc = TestClass.array_of(String, NilClass)
+
+        expect {
+          proc.call(:foo, nil)
+        }.to raise_error(/Expected an array to be passed as parameter `:foo`, but got `nil`/i)
+      end
+    end
+  end
 end
