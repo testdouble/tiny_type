@@ -15,7 +15,7 @@ module MiniType
   ARRAY_OF_INVALID_CONTENT = "Expected array passed as parameter `:%s` to contain only `%s`, but got `%s`"
 
   HASH_WITH_NOT_GIVEN_HASH = "Expected a Hash to be passed as parameter `:%s`, but got `%s`"
-  HASH_WITH_INVALID_CONTENT = "Expected hash passed as parameter `:%s` to have keys `%s`, but got `%s`"
+  HASH_WITH_INVALID_CONTENT = "Expected hash passed as parameter `:%s` to have key `%s`, but it did not`"
 
   WITH_INTERFACE_DOESNT_RESPOND = "Expected object passed as parameter `:%s` to respond to `.%s`, but it did not"
 
@@ -62,8 +62,9 @@ module MiniType
       ->(argument_name, argument_value) {
         raise(IncorrectParameterType, HASH_WITH_NOT_GIVEN_HASH % [argument_name, argument_value.inspect]) unless argument_value.is_a?(Hash)
 
-        actual_keys = argument_value.keys
-        raise(IncorrectParameterType, HASH_WITH_INVALID_CONTENT % [argument_name, expected_keys, actual_keys]) unless actual_keys.sort == expected_keys.sort
+        expected_keys.each do |key|
+          raise(IncorrectParameterType, HASH_WITH_INVALID_CONTENT % [argument_name, key.inspect]) unless argument_value.has_key?(key)
+        end
       }
     end
 
