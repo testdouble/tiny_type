@@ -53,9 +53,9 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
     $ gem install mini_type
 
-## Usage
+## Why?
 
-MiniType is designed to help document how methods are expected to be used, as well as providing an easy way to provide runtime guarding against unexpected input. For example, given this method:
+Having worked in both typed and untyped langauges I find myself loving the flexibility and clarity of Ruby, but missing the guidance that typing gives you when trying to understand a large or complex codebase. MiniType is designed to help document how methods are expected to be used, as well as providing an easy way to provide runtime guarding against unexpected input. For example, given this method:
 
 ```ruby
 def add_one(input)
@@ -84,6 +84,28 @@ now anyone working with this code can see at a glance what type of object it's e
 
 ```
 Expected parameter ':input' to be of type 'RenderableObject', but got 'String'
+```
+
+## Type declarations:
+
+```ruby
+# accept an object of a given class
+accepts {{ arg1: String }}
+
+# accept an object that is one of a list of classes
+accepts {{ arg1: [String, OtherClass, ThirdClass] }}
+
+# accept an array filled with a specific class
+accepts {{ arg1: array_of(String) }}
+
+# accept an array filled with any of a list of classes
+accepts {{ arg1: array_of(String, OtherClass, ThirdClass) }}
+
+# accept a hash that must have the specified keys
+accepts {{ arg1: hash_with(:foo, :bar) }}
+
+# accept an object that must respond to the specified methods
+accepts {{ arg1: with_interface(:method1, :method2) }}
 ```
 
 ## How it works
