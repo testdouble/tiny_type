@@ -142,7 +142,114 @@ RSpec.describe MiniType do
 
         expect {
           proc.call(:foo, nil)
-        }.to raise_error(/Expected an array to be passed as parameter `:foo`, but got `nil`/i)
+        }.to raise_error(/Expected an Array to be passed as parameter `:foo`, but got `nil`/i)
+      end
+    end
+  end
+
+  describe ".hash_with" do
+    it "returns a proc" do
+      result = TestClass.hash_with(:foo, :bar)
+      expect(result).to be_a(Proc)
+    end
+
+    describe "the returned proc" do
+      it "does not raise an error when given a hash with all the keys we expect" do
+        proc = TestClass.hash_with(:foo, :bar)
+
+        expect {
+          proc.call(:foo, {foo: 1, bar: 2})
+        }.not_to raise_error
+      end
+
+      it "raises an error when given a hash with extra keys" do
+        proc = TestClass.hash_with(:foo, :bar)
+
+        expect {
+          proc.call(:foo, {foo: 1, bar: 2, baz: 3})
+        }.to raise_error(/Expected hash passed as parameter `:foo` to have keys `\[:foo, :bar\]`, but got `\[:foo, :bar, :baz\]`/i)
+      end
+
+      it "raises an error when given a hash with missing keys" do
+        proc = TestClass.hash_with(:foo, :bar)
+
+        expect {
+          proc.call(:foo, {foo: 1})
+        }.to raise_error(/Expected hash passed as parameter `:foo` to have keys `\[:foo, :bar\]`, but got `\[:foo\]`/i)
+      end
+
+      it "raises an error when given something other than a Hash" do
+        proc = TestClass.hash_with(:foo)
+
+        expect {
+          proc.call(:foo, nil)
+        }.to raise_error(/Expected a Hash to be passed as parameter `:foo`, but got `nil`/i)
+      end
+    end
+  end
+
+  describe ".hash_with" do
+    it "returns a proc" do
+      result = TestClass.hash_with(:foo, :bar)
+      expect(result).to be_a(Proc)
+    end
+
+    describe "the returned proc" do
+      it "does not raise an error when given a hash with all the keys we expect" do
+        proc = TestClass.hash_with(:foo, :bar)
+
+        expect {
+          proc.call(:foo, {foo: 1, bar: 2})
+        }.not_to raise_error
+      end
+
+      it "raises an error when given a hash with extra keys" do
+        proc = TestClass.hash_with(:foo, :bar)
+
+        expect {
+          proc.call(:foo, {foo: 1, bar: 2, baz: 3})
+        }.to raise_error(/Expected hash passed as parameter `:foo` to have keys `\[:foo, :bar\]`, but got `\[:foo, :bar, :baz\]`/i)
+      end
+
+      it "raises an error when given a hash with missing keys" do
+        proc = TestClass.hash_with(:foo, :bar)
+
+        expect {
+          proc.call(:foo, {foo: 1})
+        }.to raise_error(/Expected hash passed as parameter `:foo` to have keys `\[:foo, :bar\]`, but got `\[:foo\]`/i)
+      end
+
+      it "raises an error when given something other than a Hash" do
+        proc = TestClass.hash_with(:foo)
+
+        expect {
+          proc.call(:foo, nil)
+        }.to raise_error(/Expected a Hash to be passed as parameter `:foo`, but got `nil`/i)
+      end
+    end
+  end
+
+  describe ".with_interface" do
+    it "returns a proc" do
+      result = TestClass.with_interface(:foo, :bar)
+      expect(result).to be_a(Proc)
+    end
+
+    describe "the returned proc" do
+      it "does not raise an error when given an object that responds to the required methods" do
+        proc = TestClass.with_interface(:foo, :bar)
+
+        expect {
+          proc.call(:foo, double(foo: 1, bar: 2))
+        }.not_to raise_error
+      end
+
+      it "raises an error when given an object that does not respond to the required methods" do
+        proc = TestClass.with_interface(:foo, :bar)
+
+        expect {
+          proc.call(:foo, double(foo: 1))
+        }.to raise_error(/Expected object passed as parameter `:foo` to respond to `.bar`, but it did not/i)
       end
     end
   end

@@ -11,8 +11,13 @@ module MiniType
   INVALID_DECLARAION = "Invalid type declaration. The `accepts` method expects a block that returns a hash, like: `accepts {{ foo: String }}`. Received: '%s'"
   INVALID_TYPE = "Invalid type declaration for: ':%s'. Type declaration should be a class literal (`String`), an aray of class literals (`[String, NilClass]`), or a matcher (`array_of(String)`)."
 
-  ARRAY_OF_NOT_GIVEN_ARRAY = "Expected an array to be passed as parameter `:%s`, but got `%s`"
+  ARRAY_OF_NOT_GIVEN_ARRAY = "Expected an Array to be passed as parameter `:%s`, but got `%s`"
   ARRAY_OF_INVALID_CONTENT = "Expected array passed as parameter `:%s` to contain only `%s`, but got `%s`"
+
+  HASH_WITH_NOT_GIVEN_HASH = "Expected a Hash to be passed as parameter `:%s`, but got `%s`"
+  HASH_WITH_INVALID_CONTENT = "Expected hash passed as parameter `:%s` to have keys `%s`, but got `%s`"
+
+  WITH_INTERFACE_DOESNT_RESPOND = "Expected object passed as parameter `:%s` to respond to `.%s`, but it did not"
 
   def self.included(base)
     base.extend(Methods)
@@ -50,6 +55,23 @@ module MiniType
 
         actual_classes = argument_value.map(&:class).uniq
         raise(IncorrectParameterType, ARRAY_OF_INVALID_CONTENT % [argument_name, allowed_classes, actual_classes]) unless actual_classes.map(&:name).sort == allowed_classes.map(&:name).sort
+      }
+    end
+
+    def hash_with(*expected_keys)
+      ->(argument_name, argument_value) {
+        raise(IncorrectParameterType, HASH_WITH_NOT_GIVEN_HASH % [argument_name, argument_value.inspect]) unless argument_value.is_a?(Hash)
+
+        actual_keys = argument_value.keys
+        raise(IncorrectParameterType, HASH_WITH_INVALID_CONTENT % [argument_name, expected_keys, actual_keys]) unless actual_keys.sort == expected_keys.sort
+      }
+    end
+
+    def with_interface(*must_respond_to)
+      ->(argument_name, argument_value) {
+        must_respond_to.each do |method_name|
+          raise(IncorrectParameterType, WITH_INTERFACE_DOESNT_RESPOND % [argument_name, method_name]) unless argument_value.respond_to?(method_name)
+        end
       }
     end
   end
