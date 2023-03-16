@@ -4,7 +4,7 @@
 
 # MiniType
 
-MiniType is a small runtime type checking system for Ruby. MiniType does not require any setup other than installing the gem, and adding `accepts` definitions for your methods.
+MiniType is a small runtime type checking system for Ruby. MiniType does not require any setup other than installing the gem, and adding `accepts` definitions to your methods.
 
 ## Quick Start
 
@@ -19,11 +19,36 @@ class AmazingClass
     # param1 should only be a String
     # param2 can be a String or `nil`
     accepts {{ param1: String, param2: [Integer, NilClass] }}
+
+    # do some work
   end
 
   def self.print_name(name:)
     # works with positional arguments and with keyword arguments
     accepts {{ name: String }}
+
+    # do some other work
+  end
+
+  def self.output_array(array)
+    # allow an array filled with defined types of objects
+    accepts {{ array: array_of(String, NilClass) }}
+
+    # keep working
+  end
+
+  def self.output_hash(hash)
+    # define that a parameter is a hash that should have certain keys
+    accepts {{ thing: hash_with(:key1, :some_other_key) }}
+
+    # use the hash
+  end
+
+  def self.render(thing)
+    # define that a parameter must respond to a given interface
+    accepts {{ thing: with_interface(:render, :to_s) }}
+
+    # use the interface
   end
 end
 ```
