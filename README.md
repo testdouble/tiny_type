@@ -83,7 +83,7 @@ end
 now anyone working with this code can see at a glance what type of object it's expecting to be given, and if the `render` method is given anything other than a `RenderableObject` it will raise an exception with a clear error message:
 
 ```
-Expected parameter ':input' to be of type 'RenderableObject', but got 'String'
+Expected argument ':input' to be of type 'RenderableObject', but got 'String'
 ```
 
 ## Type declarations:

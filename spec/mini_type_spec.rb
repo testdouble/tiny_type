@@ -94,7 +94,7 @@ RSpec.describe MiniType do
         accepts { {param1: NilClass, param2: NilClass} }
       end
 
-      expect { TestClass.test("foo", 1234) }.to raise_error(MiniType::IncorrectParameterType)
+      expect { TestClass.test("foo", 1234) }.to raise_error(MiniType::IncorrectArgumentType)
     end
   end
 
@@ -126,7 +126,7 @@ RSpec.describe MiniType do
 
         expect {
           proc.call(:foo, ["abc", :symbol, 1])
-        }.to raise_error(/Expected array passed as parameter `:foo` to contain only `\[String\]`, but got `\[String, Symbol, Integer\]`/i)
+        }.to raise_error(/Expected array passed as argument `:foo` to contain only `\[String\]`, but got `\[String, Symbol, Integer\]`/i)
       end
 
       it "raises an error when given an array where not all elements match a list of allowed class" do
@@ -134,7 +134,7 @@ RSpec.describe MiniType do
 
         expect {
           proc.call(:foo, ["abc", :symbol, 1, nil])
-        }.to raise_error(/Expected array passed as parameter `:foo` to contain only `\[String, NilClass\]`, but got `\[String, Symbol, Integer, NilClass\]`/i)
+        }.to raise_error(/Expected array passed as argument `:foo` to contain only `\[String, NilClass\]`, but got `\[String, Symbol, Integer, NilClass\]`/i)
       end
 
       it "raises an error when given something other than an Array" do
@@ -142,7 +142,7 @@ RSpec.describe MiniType do
 
         expect {
           proc.call(:foo, nil)
-        }.to raise_error(/Expected an Array to be passed as parameter `:foo`, but got `nil`/i)
+        }.to raise_error(/Expected an Array to be passed as argument `:foo`, but got `nil`/i)
       end
     end
   end
@@ -175,7 +175,7 @@ RSpec.describe MiniType do
 
         expect {
           proc.call(:foo, {foo: 1})
-        }.to raise_error(/Expected hash passed as parameter `:foo` to have key `:bar`, but it did not`/i)
+        }.to raise_error(/Expected hash passed as argument `:foo` to have key `:bar`, but it did not`/i)
       end
 
       it "raises an error when given something other than a Hash" do
@@ -183,7 +183,7 @@ RSpec.describe MiniType do
 
         expect {
           proc.call(:foo, nil)
-        }.to raise_error(/Expected a Hash to be passed as parameter `:foo`, but got `nil`/i)
+        }.to raise_error(/Expected a Hash to be passed as argument `:foo`, but got `nil`/i)
       end
     end
   end
@@ -208,7 +208,7 @@ RSpec.describe MiniType do
 
         expect {
           proc.call(:foo, double(foo: 1))
-        }.to raise_error(/Expected object passed as parameter `:foo` to respond to `.bar`, but it did not/i)
+        }.to raise_error(/Expected object passed as argument `:foo` to respond to `.bar`, but it did not/i)
       end
     end
   end

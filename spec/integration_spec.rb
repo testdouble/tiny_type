@@ -42,10 +42,10 @@ RSpec.describe "MiniType Integration" do
         }.not_to raise_error
       end
 
-      it "raises IncorrectParameterType when given incorrect arguments" do
+      it "raises IncorrectArgumentType when given incorrect arguments" do
         expect {
           AmazingClass.new(1)
-        }.to raise_error(MiniType::IncorrectParameterType)
+        }.to raise_error(MiniType::IncorrectArgumentType)
       end
     end
 
@@ -56,10 +56,10 @@ RSpec.describe "MiniType Integration" do
         }.not_to raise_error
       end
 
-      it "raises MiniType::IncorrectParameterType when given incorrect arguments" do
+      it "raises MiniType::IncorrectArgumentType when given incorrect arguments" do
         expect {
           AmazingClass.new("foo").print_name(name: :incorrect)
-        }.to raise_error(MiniType::IncorrectParameterType)
+        }.to raise_error(MiniType::IncorrectArgumentType)
       end
     end
 
@@ -70,10 +70,10 @@ RSpec.describe "MiniType Integration" do
         }.not_to raise_error
       end
 
-      it "raises MiniType::IncorrectParameterType when given incorrect arguments" do
+      it "raises MiniType::IncorrectArgumentType when given incorrect arguments" do
         expect {
           AmazingClass.output_array([:foo, 1])
-        }.to raise_error(MiniType::IncorrectParameterType)
+        }.to raise_error(MiniType::IncorrectArgumentType)
       end
     end
 
@@ -84,10 +84,10 @@ RSpec.describe "MiniType Integration" do
         }.not_to raise_error
       end
 
-      it "raises MiniType::IncorrectParameterType when given incorrect arguments" do
+      it "raises MiniType::IncorrectArgumentType when given incorrect arguments" do
         expect {
           AmazingClass.output_hash({key1: 1, incorrect_key: 2})
-        }.to raise_error(MiniType::IncorrectParameterType)
+        }.to raise_error(MiniType::IncorrectArgumentType)
       end
     end
 
@@ -98,10 +98,10 @@ RSpec.describe "MiniType Integration" do
         }.not_to raise_error
       end
 
-      it "raises MiniType::IncorrectParameterType when given incorrect arguments" do
+      it "raises MiniType::IncorrectArgumentType when given incorrect arguments" do
         expect {
           AmazingClass.render(double(render: "string", incorrect_method: 1))
-        }.to raise_error(MiniType::IncorrectParameterType)
+        }.to raise_error(MiniType::IncorrectArgumentType)
       end
     end
   end
