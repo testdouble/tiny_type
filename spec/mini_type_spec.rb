@@ -368,7 +368,7 @@ RSpec.describe MiniType do
       before { allow(MiniType).to receive(:notify) }
 
       it "does not call MiniType.notify when given an object that responds to the required methods" do
-        proc = TestClass
+        TestClass
           .with_interface(:foo, :bar)
           .call(mode_override: nil, argument_name: :foo, argument_value: double(foo: 1, bar: 2))
 
@@ -376,7 +376,7 @@ RSpec.describe MiniType do
       end
 
       it "calls MiniType.notify when given an object that does not respond to the required methods" do
-        proc = TestClass
+        TestClass
           .with_interface(:foo, :bar)
           .call(mode_override: nil, argument_name: :foo, argument_value: double(foo: 1))
 
