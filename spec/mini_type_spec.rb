@@ -66,6 +66,70 @@ RSpec.describe MiniType do
     end
   end
 
+  describe ".notify" do
+    context "when MiniType.mode is :raise and no override is given" do
+      it "raises an error and does not call MiniType.logger.warn" do
+        MiniType.mode = :raise
+        allow(MiniType.logger).to receive(:warn)
+
+        expect {
+          MiniType.notify(mode_override: nil, exception_class: MiniType::IncorrectArgumentType, message: "test message")
+        }.to raise_error(MiniType::IncorrectArgumentType)
+
+        expect(MiniType.logger).not_to have_received(:warn)
+      end
+    end
+
+    context "when MiniType.mode is :raise and mode_override is set to :warn" do
+      it "it does not raise an error and calls MiniType.logger.warn" do
+        MiniType.mode = :raise
+        allow(MiniType.logger).to receive(:warn)
+
+        expect {
+          MiniType.notify(mode_override: :warn, exception_class: MiniType::IncorrectArgumentType, message: "test message")
+        }.not_to raise_error
+
+        expect(MiniType.logger).to have_received(:warn).with("MiniType::IncorrectArgumentType: test message")
+      end
+    end
+
+    context "when MiniType.mode is :warn and no override is given" do
+      it "does not raise an error and calls MiniType.logger.warn" do
+        MiniType.mode = :warn
+        allow(MiniType.logger).to receive(:warn)
+
+        expect {
+          MiniType.notify(mode_override: nil, exception_class: MiniType::IncorrectArgumentType, message: "test message")
+        }.not_to raise_error
+
+        expect(MiniType.logger).to have_received(:warn).with("MiniType::IncorrectArgumentType: test message")
+      end
+    end
+
+    context "when MiniType.mode is :warn and mode_override is set to :raise" do
+      it "does not raise an error and calls MiniType.logger.warn" do
+        MiniType.mode = :warn
+        allow(MiniType.logger).to receive(:warn)
+
+        expect {
+          MiniType.notify(mode_override: :raise, exception_class: MiniType::IncorrectArgumentType, message: "test message")
+        }.to raise_error(MiniType::IncorrectArgumentType)
+
+        expect(MiniType.logger).not_to have_received(:warn)
+      end
+    end
+
+    context "when MiniType.mode is :warn and mode_override is set to an unexpected value" do
+      it "does not raise an error and calls MiniType.logger.warn" do
+        MiniType.mode = :warn
+
+        expect {
+          MiniType.notify(mode_override: :foo, exception_class: MiniType::IncorrectArgumentType, message: "test message")
+        }.to raise_error("Unknown notification mode for MiniType, expected one of [:raise, :warn] but got :foo")
+      end
+    end
+  end
+
   describe "#accepts" do
     it "is accessible in an instance method" do
       instance = TestClass.new

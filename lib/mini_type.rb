@@ -47,6 +47,19 @@ module MiniType
   def self.logger
     @logger
   end
+
+  def self.notify(mode_override:, message:, exception_class: IncorrectArgumentType)
+    mode_override ||= mode
+
+    if mode_override == :raise
+      raise(exception_class, message)
+    elsif mode_override == :warn
+      logger.warn("#{exception_class.name}: #{message}")
+    else
+      raise "Unknown notification mode for MiniType, expected one of #{VALID_MODES.inspect} but got #{mode_override.inspect}"
+    end
+  end
+
   module Methods
     def accepts(&block)
       declaration = block.call
