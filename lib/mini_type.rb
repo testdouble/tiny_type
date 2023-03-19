@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "mini_type/version"
+require "logger"
 
 module MiniType
   class MiniTypeError < StandardError; end
@@ -27,6 +28,7 @@ module MiniType
   end
 
   @mode = :raise
+  @logger = Logger.new($stderr)
 
   def self.mode=(mode)
     raise "MiniType mode must be one of #{VALID_MODES.inspect}" unless VALID_MODES.include?(mode)
@@ -37,6 +39,14 @@ module MiniType
     @mode
   end
 
+  def self.logger=(logger)
+    raise "MiniType.logger expects an object that responds to :warn" unless logger.respond_to?(:warn)
+    @logger = logger
+  end
+
+  def self.logger
+    @logger
+  end
   module Methods
     def accepts(&block)
       declaration = block.call

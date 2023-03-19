@@ -11,6 +11,29 @@ RSpec.describe MiniType do
     end
   end
 
+  describe ".logger=" do
+    before { @old_logger = MiniType.logger }
+    after { MiniType.logger = @old_logger }
+
+    it "does not raise an error when passed an object that responds to :warn" do
+      expect {
+        MiniType.logger = double(warn: :foo)
+      }.not_to raise_error
+    end
+
+    it "raises an error when passed an object that does not respond to :warn" do
+      expect {
+        MiniType.logger = double
+      }.to raise_error("MiniType.logger expects an object that responds to :warn")
+    end
+  end
+
+  describe ".logger" do
+    it "returns a Logger instance by default" do
+      expect(MiniType.logger).to be_a(Logger)
+    end
+  end
+
   describe ".mode=" do
     it "does not raise an error when being set to :warn" do
       expect {
