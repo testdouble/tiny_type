@@ -148,12 +148,12 @@ accepts(:raise) {{ arg1: String }}
 The `accepts` method takes a mode and a block as its arguments, the block should return a hash containing the local variables you want to check. This can be expressed in two ways:
 
 ```ruby
-accepts do
+accepts(:raise) do
   { foo: String }
 end
 
 # or the preferred style:
-accepts {{ foo: String }}
+accepts(:raise) {{ foo: String }}
 
 ```
 
@@ -161,7 +161,7 @@ In Ruby blocks capture information about the context in which they were defined.
 
 ```ruby
 
-def accepts(&block)
+def accepts(mode, &block)
   context = block.binding
   context.local_variables.each do |name|
     puts "Name: #{name}"
