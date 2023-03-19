@@ -11,7 +11,8 @@ MiniType is a small runtime type checking system for Ruby. MiniType does not req
 ```ruby
 require "mini_type"
 
-MiniType.mode = :raise # set to :raise or :warn
+# Optional setup
+MiniType.mode = :raise # set to :raise or :warn, defaults to :raise
 MiniType.logger = Rails.logger # when using :warn set the logger to your application's logger
 
 class AmazingClass
