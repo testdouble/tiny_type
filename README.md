@@ -1,6 +1,6 @@
 [![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
 [![build](https://github.com/testdouble/mini_type/actions/workflows/main.yml/badge.svg)](https://github.com/testdouble/mini_type/actions/workflows/main.yml)
-![license](https://img.shields.io/github/license/testdouble/mini_type)
+[![license](https://img.shields.io/github/license/testdouble/mini_type)](https://github.com/testdouble/mini_type/blob/main/LICENSE.txt)
 
 # MiniType
 
@@ -11,7 +11,8 @@ MiniType is a small runtime type checking system for Ruby. MiniType does not req
 ```ruby
 require "mini_type"
 
-# Optional setup
+# Optional setup, this should be done once
+# in a config file or similar for your app
 MiniType.mode = :raise # set to :raise or :warn, defaults to :raise
 MiniType.logger = Rails.logger # when using :warn set the logger to your application's logger
 
@@ -96,6 +97,22 @@ now anyone working with this code can see at a glance what type of object it's e
 Expected argument ':input' to be of type 'RenderableObject', but got 'String'
 ```
 
+## Configuration:
+
+```ruby
+# raise an exception whenever arguments do not match declarations
+MiniType.mode = :raise
+
+# log a warning whenever arguments do not match declarations
+MiniType.mode = :warn
+
+# customize where MiniType warnings are logged
+# accepts any object that reponds to :warn
+MiniType.logger = Rails.logger
+MiniType.logger = Logger.new($stderr)
+MiniType.logger = Log4r::Logger.new("Application Log")
+```
+
 ## Type declarations:
 
 ```ruby
@@ -116,11 +133,17 @@ accepts {{ arg1: hash_with(:foo, :bar) }}
 
 # accept an object that must respond to the specified methods
 accepts {{ arg1: with_interface(:method1, :method2) }}
+
+# raise a warning when this declartion is not met
+accepts(:warn) {{ arg1: String }}
+
+# raise an exception when this declartion is not met
+accepts(:raise) {{ arg1: String }}
 ```
 
 ## How it works
 
-The `accepts` method takes a block as the only argument, and the block should return a hash containing the local variables you want to check. This can be expressed in two ways:
+The `accepts` method takes a mode and a block as its arguments, the block should return a hash containing the local variables you want to check. This can be expressed in two ways:
 
 ```ruby
 accepts do
