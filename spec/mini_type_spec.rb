@@ -11,8 +11,40 @@ RSpec.describe MiniType do
     end
   end
 
+  describe ".mode=" do
+    it "does not raise an error when being set to :warn" do
+      expect {
+        MiniType.mode = :warn
+      }.not_to raise_error
+    end
+
+    it "does not raise an error when being set to :raise" do
+      expect {
+        MiniType.mode = :raise
+      }.not_to raise_error
+    end
+
+    it "raises an error when set to anything else" do
+      expect {
+        MiniType.mode = :booooo
+      }.to raise_error("MiniType mode must be one of [:raise, :warn]")
+    end
+  end
+
+  describe ".mode" do
+    it "returns the correct mode when set to :warn" do
+      MiniType.mode = :warn
+      expect(MiniType.mode).to eq(:warn)
+    end
+
+    it "returns the correct mode when set to :raise" do
+      MiniType.mode = :raise
+      expect(MiniType.mode).to eq(:raise)
+    end
+  end
+
   describe "#accepts" do
-    it "works correctly in an instance method" do
+    it "is accessible in an instance method" do
       instance = TestClass.new
 
       def instance.test(param1)

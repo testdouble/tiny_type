@@ -7,6 +7,8 @@ module MiniType
 
   class IncorrectArgumentType < MiniTypeError; end
 
+  VALID_MODES = [:raise, :warn]
+
   INCORRECT_ARGUMENT_TYPE = "Expected argument ':%s' to be of type '%s', but got '%s'"
   INVALID_DECLARAION = "Invalid type declaration. The `accepts` method expects a block that returns a hash, like: `accepts {{ foo: String }}`. Received: '%s'"
   INVALID_TYPE = "Invalid type declaration for: ':%s'. Type declaration should be a class literal (`String`), an aray of class literals (`[String, NilClass]`), or a matcher (`array_of(String)`)."
@@ -22,6 +24,17 @@ module MiniType
   def self.included(base)
     base.extend(Methods)
     base.include(Methods)
+  end
+
+  @mode = :raise
+
+  def self.mode=(mode)
+    raise "MiniType mode must be one of #{VALID_MODES.inspect}" unless VALID_MODES.include?(mode)
+    @mode = mode
+  end
+
+  def self.mode
+    @mode
   end
 
   module Methods
