@@ -8,6 +8,8 @@ module MiniType
 
   class IncorrectArgumentType < MiniTypeError; end
 
+  class UndeclaredArgument < MiniTypeError; end
+
   VALID_MODES = [:raise, :warn]
 
   INCORRECT_ARGUMENT_TYPE = "Expected argument ':%s' to be of type '%s', but got '%s'"
@@ -61,24 +63,32 @@ module MiniType
   end
 
   module Methods
-    def accepts(&block)
+    def accepts(mode_override = nil, &block)
       declaration = block.call
       context = block.binding
 
       raise(IncorrectArgumentType, INVALID_DECLARAION % [declaration.inspect]) unless declaration.is_a?(Hash)
 
       undeclared_arguments = context.local_variables - declaration.keys
-      raise ArgumentError.new("Undeclared arguments: #{undeclared_arguments.inspect}") unless undeclared_arguments.empty?
+      unless undeclared_arguments.empty?
+        MiniType.notify(
+          mode_override: mode_override,
+          exception_class: UndeclaredArgument,
+          message: "Undeclared arguments: #{undeclared_arguments.inspect}"
+        )
+      end
 
       declaration.each_pair do |argument_name, allowable_type|
         argument_value = context.local_variable_get(argument_name)
 
         if allowable_type.respond_to?(:call)
-          allowable_type.call(argument_name, argument_value)
+          allowable_type.call(mode_override: mode_override, argument_name: argument_name, argument_value: argument_value)
         elsif allowable_type.is_a?(Array)
-          raise(IncorrectArgumentType, INCORRECT_ARGUMENT_TYPE % [argument_name, allowable_type, argument_value.class.name]) unless allowable_type.include?(argument_value.class)
+          next if allowable_type.include?(argument_value.class)
+          MiniType.notify(mode_override: mode_override, message: "Expected argument ':#{argument_name}' to be a '#{allowable_type}', but got '#{argument_value.class.name}'")
         elsif allowable_type.is_a?(Class)
-          raise(IncorrectArgumentType, INCORRECT_ARGUMENT_TYPE % [argument_name, allowable_type, argument_value.class.name]) unless argument_value.is_a?(allowable_type)
+          next if argument_value.is_a?(allowable_type)
+          MiniType.notify(mode_override: mode_override, message: "Expected argument ':#{argument_name}' to be a '#{allowable_type}', but got '#{argument_value.class.name}'")
         else
           raise(IncorrectArgumentType, INVALID_TYPE % [argument_name])
         end
@@ -86,28 +96,53 @@ module MiniType
     end
 
     def array_of(*allowed_classes)
-      ->(argument_name, argument_value) {
-        raise(IncorrectArgumentType, ARRAY_OF_NOT_GIVEN_ARRAY % [argument_name, argument_value.inspect]) unless argument_value.is_a?(Array)
+      ->(mode_override:, argument_name:, argument_value:) {
+        unless argument_value.is_a?(Array)
+          return MiniType.notify(
+            mode_override: mode_override,
+            message: "Expected an Array to be passed as argument `:#{argument_name}`, but got `#{argument_value.inspect}`"
+          )
+        end
 
         actual_classes = argument_value.map(&:class).uniq
-        raise(IncorrectArgumentType, ARRAY_OF_INVALID_CONTENT % [argument_name, allowed_classes, actual_classes]) unless actual_classes.map(&:name).sort == allowed_classes.map(&:name).sort
+        return if actual_classes.map(&:name).sort == allowed_classes.map(&:name).sort
+
+        MiniType.notify(
+          mode_override: mode_override,
+          message: "Expected array passed as argument `:#{argument_name}` to contain only `#{allowed_classes}`, but got `#{actual_classes}`"
+        )
       }
     end
 
     def hash_with(*expected_keys)
-      ->(argument_name, argument_value) {
-        raise(IncorrectArgumentType, HASH_WITH_NOT_GIVEN_HASH % [argument_name, argument_value.inspect]) unless argument_value.is_a?(Hash)
+      ->(mode_override:, argument_name:, argument_value:) {
+        unless argument_value.is_a?(Hash)
+          return MiniType.notify(
+            mode_override: nil,
+            message: "Expected a Hash to be passed as argument `:#{argument_name}`, but got `#{argument_value.inspect}`"
+          )
+        end
 
         expected_keys.each do |key|
-          raise(IncorrectArgumentType, HASH_WITH_INVALID_CONTENT % [argument_name, key.inspect]) unless argument_value.has_key?(key)
+          next if argument_value.has_key?(key)
+
+          MiniType.notify(
+            mode_override: mode_override,
+            message: "Expected hash passed as argument `:#{argument_name}` to have key `#{key.inspect}`, but it did not"
+          )
         end
       }
     end
 
     def with_interface(*must_respond_to)
-      ->(argument_name, argument_value) {
+      ->(mode_override:, argument_name:, argument_value:) {
         must_respond_to.each do |method_name|
-          raise(IncorrectArgumentType, WITH_INTERFACE_DOESNT_RESPOND % [argument_name, method_name]) unless argument_value.respond_to?(method_name)
+          next if argument_value.respond_to?(method_name)
+
+          MiniType.notify(
+            mode_override: mode_override,
+            message: "Expected object passed as argument `:#{argument_name}` to respond to `.#{method_name}`, but it did not"
+          )
         end
       }
     end

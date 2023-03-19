@@ -143,6 +143,8 @@ RSpec.describe MiniType do
   end
 
   describe ".accepts" do
+    before { allow(MiniType).to receive(:notify) }
+
     it "raises an error when given an invalid declaration" do
       def TestClass.test(param1, param2)
         accepts { "foo" }
@@ -169,7 +171,7 @@ RSpec.describe MiniType do
 
     it "allows using a block matcher in the declaration" do
       def TestClass.test(param1)
-        accepts { {param1: ->(_arg_name, x) { x.is_a?(String) }} }
+        accepts { {param1: ->(mode_override:, argument_name:, argument_value:) { argument_value.is_a?(String) }} }
       end
 
       expect { TestClass.test("foo") }.not_to raise_error
@@ -183,37 +185,67 @@ RSpec.describe MiniType do
       expect { TestClass.test("foo") }.not_to raise_error
     end
 
-    it "does not raise an error when local variables match declarations" do
+    it "does not call MiniType.notify when local variables match declarations" do
       def TestClass.test(param1, param2)
         accepts { {param1: String, param2: Integer} }
       end
 
-      expect { TestClass.test("foo", 1) }.not_to raise_error
+      expect(MiniType).not_to have_received(:notify)
     end
 
-    it "does not raise an error when local variables match any option of union declaration" do
+    it "does not call MiniType.notify when local variables match any option of union declaration" do
       def TestClass.test(param1)
         accepts { {param1: [String, Integer]} }
       end
 
-      expect { TestClass.test("foo") }.not_to raise_error
-      expect { TestClass.test(1) }.not_to raise_error
+      TestClass.test("foo")
+      TestClass.test(1)
+
+      expect(MiniType).not_to have_received(:notify)
     end
 
-    it "raises an error if a variable is not declared" do
+    it "calls MiniType.notify if a variable is not declared" do
       def TestClass.test(param1, param2 = nil)
         accepts { {param1: String} }
       end
 
-      expect { TestClass.test("foo") }.to raise_error(/Undeclared arguments: \[:param2\]/i)
+      TestClass.test("foo")
+
+      expect(MiniType).to have_received(:notify).with(
+        mode_override: nil,
+        exception_class: MiniType::UndeclaredArgument,
+        message: "Undeclared arguments: [:param2]"
+      )
     end
 
-    it "raises an error when local variables do not match declaration" do
+    it "calls MiniType.notify when local variables do not match union declaration" do
+      def TestClass.test(param1)
+        accepts { {param1: [NilClass, Integer]} }
+      end
+
+      TestClass.test("foo")
+
+      expect(MiniType).to have_received(:notify).with(
+        mode_override: nil,
+        message: "Expected argument ':param1' to be a '[NilClass, Integer]', but got 'String'"
+      )
+    end
+
+    it "calls MiniType.notify when local variables do not match declaration" do
       def TestClass.test(param1, param2)
         accepts { {param1: NilClass, param2: NilClass} }
       end
 
-      expect { TestClass.test("foo", 1234) }.to raise_error(MiniType::IncorrectArgumentType)
+      TestClass.test("foo", 1234)
+
+      expect(MiniType).to have_received(:notify).with(
+        mode_override: nil,
+        message: "Expected argument ':param1' to be a 'NilClass', but got 'String'"
+      )
+      expect(MiniType).to have_received(:notify).with(
+        mode_override: nil,
+        message: "Expected argument ':param2' to be a 'NilClass', but got 'Integer'"
+      )
     end
   end
 
@@ -224,44 +256,55 @@ RSpec.describe MiniType do
     end
 
     describe "the returned proc" do
-      it "does not raise an error when given an array where all elements match a single allowed class" do
-        proc = TestClass.array_of(String)
+      before { allow(MiniType).to receive(:notify) }
 
-        expect {
-          proc.call(:foo, ["abc", "def"])
-        }.not_to raise_error
+      it "does not call MiniType.notify when given an array where all elements match a single allowed class" do
+        TestClass
+          .array_of(String)
+          .call(mode_override: nil, argument_name: :foo, argument_value: ["abc", "def"])
+
+        expect(MiniType).not_to have_received(:notify)
       end
 
-      it "does not raise an error when given an array where all elements match a list of allowed class" do
-        proc = TestClass.array_of(String, NilClass, Integer)
+      it "does not call MiniType.notify when given an array where all elements match a list of allowed class" do
+        TestClass
+          .array_of(String, NilClass, Integer)
+          .call(mode_override: nil, argument_name: :foo, argument_value: ["abc", nil, nil, 1, 2, 4])
 
-        expect {
-          proc.call(:foo, ["abc", nil, nil, 1, 2, 4])
-        }.not_to raise_error
+        expect(MiniType).not_to have_received(:notify)
       end
 
-      it "raises an error when given an array where not all elements match a single allowed class" do
-        proc = TestClass.array_of(String)
+      it "calls MiniType.notify when given an array where not all elements match a single allowed class" do
+        TestClass
+          .array_of(String)
+          .call(mode_override: nil, argument_name: :foo, argument_value: ["abc", :symbol, 1])
 
-        expect {
-          proc.call(:foo, ["abc", :symbol, 1])
-        }.to raise_error(/Expected array passed as argument `:foo` to contain only `\[String\]`, but got `\[String, Symbol, Integer\]`/i)
+        expect(MiniType).to have_received(:notify).with(
+          mode_override: nil,
+          message: "Expected array passed as argument `:foo` to contain only `[String]`, but got `[String, Symbol, Integer]`"
+        )
       end
 
-      it "raises an error when given an array where not all elements match a list of allowed class" do
-        proc = TestClass.array_of(String, NilClass)
+      it "calls MiniType.notify when given an array where not all elements match a list of allowed class" do
+        TestClass
+          .array_of(String, NilClass)
+          .call(mode_override: nil, argument_name: :foo, argument_value: ["abc", :symbol, 1, nil])
 
-        expect {
-          proc.call(:foo, ["abc", :symbol, 1, nil])
-        }.to raise_error(/Expected array passed as argument `:foo` to contain only `\[String, NilClass\]`, but got `\[String, Symbol, Integer, NilClass\]`/i)
+        expect(MiniType).to have_received(:notify).with(
+          mode_override: nil,
+          message: "Expected array passed as argument `:foo` to contain only `[String, NilClass]`, but got `[String, Symbol, Integer, NilClass]`"
+        )
       end
 
-      it "raises an error when given something other than an Array" do
-        proc = TestClass.array_of(String, NilClass)
+      it "calls MiniType.notify when given something other than an Array" do
+        TestClass
+          .array_of(String, NilClass)
+          .call(mode_override: nil, argument_name: :foo, argument_value: nil)
 
-        expect {
-          proc.call(:foo, nil)
-        }.to raise_error(/Expected an Array to be passed as argument `:foo`, but got `nil`/i)
+        expect(MiniType).to have_received(:notify).with(
+          mode_override: nil,
+          message: "Expected an Array to be passed as argument `:foo`, but got `nil`"
+        )
       end
     end
   end
@@ -273,36 +316,44 @@ RSpec.describe MiniType do
     end
 
     describe "the returned proc" do
+      before { allow(MiniType).to receive(:notify) }
+
       it "does not raise an error when given a hash with all the keys we expect" do
-        proc = TestClass.hash_with(:foo, :bar)
+        TestClass
+          .hash_with(:foo, :bar)
+          .call(mode_override: nil, argument_name: :foo, argument_value: {foo: 1, bar: 2})
 
-        expect {
-          proc.call(:foo, {foo: 1, bar: 2})
-        }.not_to raise_error
+        expect(MiniType).not_to have_received(:notify)
       end
 
-      it "does not raise an error when given a hash with extra keys" do
-        proc = TestClass.hash_with(:foo, :bar)
+      it "does not call MiniType.notify when given a hash with extra keys" do
+        TestClass
+          .hash_with(:foo, :bar)
+          .call(mode_override: nil, argument_name: :foo, argument_value: {foo: 1, bar: 2, baz: 3})
 
-        expect {
-          proc.call(:foo, {foo: 1, bar: 2, baz: 3})
-        }.not_to raise_error
+        expect(MiniType).not_to have_received(:notify)
       end
 
-      it "raises an error when given a hash with missing keys" do
-        proc = TestClass.hash_with(:foo, :bar)
+      it "calls MiniType.notify when given a hash with missing keys" do
+        TestClass
+          .hash_with(:foo, :bar)
+          .call(mode_override: nil, argument_name: :foo, argument_value: {foo: 1})
 
-        expect {
-          proc.call(:foo, {foo: 1})
-        }.to raise_error(/Expected hash passed as argument `:foo` to have key `:bar`, but it did not`/i)
+        expect(MiniType).to have_received(:notify).with(
+          mode_override: nil,
+          message: "Expected hash passed as argument `:foo` to have key `:bar`, but it did not"
+        )
       end
 
-      it "raises an error when given something other than a Hash" do
-        proc = TestClass.hash_with(:foo)
+      it "calls MiniType.notify when given something other than a Hash" do
+        TestClass
+          .hash_with(:foo)
+          .call(mode_override: nil, argument_name: :foo, argument_value: nil)
 
-        expect {
-          proc.call(:foo, nil)
-        }.to raise_error(/Expected a Hash to be passed as argument `:foo`, but got `nil`/i)
+        expect(MiniType).to have_received(:notify).with(
+          mode_override: nil,
+          message: "Expected a Hash to be passed as argument `:foo`, but got `nil`"
+        )
       end
     end
   end
@@ -314,20 +365,25 @@ RSpec.describe MiniType do
     end
 
     describe "the returned proc" do
-      it "does not raise an error when given an object that responds to the required methods" do
-        proc = TestClass.with_interface(:foo, :bar)
+      before { allow(MiniType).to receive(:notify) }
 
-        expect {
-          proc.call(:foo, double(foo: 1, bar: 2))
-        }.not_to raise_error
+      it "does not call MiniType.notify when given an object that responds to the required methods" do
+        proc = TestClass
+          .with_interface(:foo, :bar)
+          .call(mode_override: nil, argument_name: :foo, argument_value: double(foo: 1, bar: 2))
+
+        expect(MiniType).not_to have_received(:notify)
       end
 
-      it "raises an error when given an object that does not respond to the required methods" do
-        proc = TestClass.with_interface(:foo, :bar)
+      it "calls MiniType.notify when given an object that does not respond to the required methods" do
+        proc = TestClass
+          .with_interface(:foo, :bar)
+          .call(mode_override: nil, argument_name: :foo, argument_value: double(foo: 1))
 
-        expect {
-          proc.call(:foo, double(foo: 1))
-        }.to raise_error(/Expected object passed as argument `:foo` to respond to `.bar`, but it did not/i)
+        expect(MiniType).to have_received(:notify).with(
+          mode_override: nil,
+          message: "Expected object passed as argument `:foo` to respond to `.bar`, but it did not"
+        )
       end
     end
   end
