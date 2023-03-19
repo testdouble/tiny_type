@@ -11,6 +11,9 @@ MiniType is a small runtime type checking system for Ruby. MiniType does not req
 ```ruby
 require "mini_type"
 
+MiniType.mode = :raise # set to :raise or :warn
+MiniType.logger = Rails.logger # when using :warn set the logger to your application's logger
+
 class AmazingClass
   # include MiniType in your class
   include MiniType
@@ -40,7 +43,13 @@ class AmazingClass
     accepts {{ thing: with_interface(:render, :foo) }}
     # define that an argument must respond to a given interface
   end
+
+  def self.safe_render(thing)
+    accepts(:warn) {{ thing: String }}
+    # log a warning rather than raising an error for this method
+  end
 end
+
 ```
 
 ## Installation
