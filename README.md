@@ -18,7 +18,7 @@ class AmazingClass
   def initialize(param1, param2 = nil)
     accepts {{ param1: String, param2: [Integer, NilClass] }}
     # param1 should only be a String
-    # param2 can be a String or `nil`
+    # param2 can be a Integer or `nil`
   end
 
   def print_name(name:)
