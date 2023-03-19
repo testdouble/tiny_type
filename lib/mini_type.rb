@@ -31,7 +31,7 @@ module MiniType
   @logger = Logger.new($stderr)
 
   def self.mode=(mode)
-    raise "MiniType mode must be one of #{VALID_MODES.inspect}" unless VALID_MODES.include?(mode)
+    raise "MiniType.mode must be one of #{VALID_MODES.inspect}" unless VALID_MODES.include?(mode)
     @mode = mode
   end
 

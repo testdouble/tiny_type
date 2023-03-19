@@ -50,7 +50,7 @@ RSpec.describe MiniType do
     it "raises an error when set to anything else" do
       expect {
         MiniType.mode = :booooo
-      }.to raise_error("MiniType mode must be one of [:raise, :warn]")
+      }.to raise_error("MiniType.mode must be one of [:raise, :warn]")
     end
   end
 
