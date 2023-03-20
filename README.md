@@ -134,11 +134,11 @@ accepts {{ arg1: hash_with(:foo, :bar) }}
 # accept an object that must respond to the specified methods
 accepts {{ arg1: with_interface(:method1, :method2) }}
 
-# raise a warning when this declartion is not met
+# log a warning when this declaration is not met
 # setting :warn here overrides the global config
 accepts(:warn) {{ arg1: String }}
 
-# raise an exception when this declartion is not met
+# raise an exception when this declaration is not met
 # setting :raise here overrides the global config
 accepts(:raise) {{ arg1: String }}
 ```
