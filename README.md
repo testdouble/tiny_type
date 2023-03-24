@@ -34,8 +34,8 @@ class AmazingClass
     accepts {{ thing: with_interface(:render, :foo) }}
   end
 
-  def self.safe_render(thing)
-    accepts(:warn) {{ thing: String }}
+  def self.safe_render(other_thing)
+    accepts(:warn) {{ other_thing: String }}
   end
 end
 
