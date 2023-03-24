@@ -11,44 +11,31 @@ TinyType is a small runtime type checking system for Ruby. TinyType does not req
 ```ruby
 require "tiny_type"
 
-# Optional setup, this should be done once
-# in a config file or similar for your app
-TinyType.mode = :raise # set to :raise or :warn, defaults to :raise
-TinyType.logger = Rails.logger # when using :warn set the logger to your application's logger
-
 class AmazingClass
-  # include TinyType in your class
   include TinyType
 
   def initialize(param1, param2 = nil)
     accepts {{ param1: String, param2: [Integer, NilClass] }}
-    # param1 should only be a String
-    # param2 can be a Integer or `nil`
   end
 
   def print_name(name:)
     accepts {{ name: String }}
-    # works with positional arguments and with keyword arguments
   end
 
   def self.output_array(array)
     accepts {{ array: array_of(String, NilClass) }}
-    # allow an array filled with defined types of objects
   end
 
   def self.output_hash(hash)
     accepts {{ hash: hash_with(:key1, :some_other_key) }}
-    # define that a argument is a hash that should have certain keys
   end
 
   def self.render(thing)
     accepts {{ thing: with_interface(:render, :foo) }}
-    # define that an argument must respond to a given interface
   end
 
   def self.safe_render(thing)
     accepts(:warn) {{ thing: String }}
-    # log a warning rather than raising an error for this method
   end
 end
 
