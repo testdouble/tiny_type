@@ -8,14 +8,14 @@ class Rails
   end
 end
 
-require "mini_type"
+require "tiny_type"
 
-MiniType.mode = :raise # set to :raise or :warn
-MiniType.logger = Rails.logger # when using :warn set the logger to your application's logger
+TinyType.mode = :raise # set to :raise or :warn
+TinyType.logger = Rails.logger # when using :warn set the logger to your application's logger
 
 class AmazingClass
-  # include MiniType in your class
-  include MiniType
+  # include TinyType in your class
+  include TinyType
 
   def initialize(param1, param2 = nil)
     accepts { {param1: String, param2: [Integer, NilClass]} }
@@ -49,7 +49,7 @@ class AmazingClass
   end
 end
 
-RSpec.describe "MiniType Integration" do
+RSpec.describe "TinyType Integration" do
   describe "AmazingClass" do
     describe ".new" do
       it "does not raise any errors when given correct arguments" do
@@ -61,7 +61,7 @@ RSpec.describe "MiniType Integration" do
       it "raises IncorrectArgumentType when given incorrect arguments" do
         expect {
           AmazingClass.new(1)
-        }.to raise_error(MiniType::IncorrectArgumentType)
+        }.to raise_error(TinyType::IncorrectArgumentType)
       end
     end
 
@@ -72,10 +72,10 @@ RSpec.describe "MiniType Integration" do
         }.not_to raise_error
       end
 
-      it "raises MiniType::IncorrectArgumentType when given incorrect arguments" do
+      it "raises TinyType::IncorrectArgumentType when given incorrect arguments" do
         expect {
           AmazingClass.new("foo").print_name(name: :incorrect)
-        }.to raise_error(MiniType::IncorrectArgumentType)
+        }.to raise_error(TinyType::IncorrectArgumentType)
       end
     end
 
@@ -86,10 +86,10 @@ RSpec.describe "MiniType Integration" do
         }.not_to raise_error
       end
 
-      it "raises MiniType::IncorrectArgumentType when given incorrect arguments" do
+      it "raises TinyType::IncorrectArgumentType when given incorrect arguments" do
         expect {
           AmazingClass.output_array([:foo, 1])
-        }.to raise_error(MiniType::IncorrectArgumentType)
+        }.to raise_error(TinyType::IncorrectArgumentType)
       end
     end
 
@@ -100,10 +100,10 @@ RSpec.describe "MiniType Integration" do
         }.not_to raise_error
       end
 
-      it "raises MiniType::IncorrectArgumentType when given incorrect arguments" do
+      it "raises TinyType::IncorrectArgumentType when given incorrect arguments" do
         expect {
           AmazingClass.output_hash({key1: 1, incorrect_key: 2})
-        }.to raise_error(MiniType::IncorrectArgumentType)
+        }.to raise_error(TinyType::IncorrectArgumentType)
       end
     end
 
@@ -114,15 +114,15 @@ RSpec.describe "MiniType Integration" do
         }.not_to raise_error
       end
 
-      it "raises MiniType::IncorrectArgumentType when given incorrect arguments" do
+      it "raises TinyType::IncorrectArgumentType when given incorrect arguments" do
         expect {
           AmazingClass.render(double(render: "string", incorrect_method: 1))
-        }.to raise_error(MiniType::IncorrectArgumentType)
+        }.to raise_error(TinyType::IncorrectArgumentType)
       end
     end
 
     describe ".safe_render" do
-      before { allow(MiniType.logger).to receive(:warn) }
+      before { allow(TinyType.logger).to receive(:warn) }
 
       it "does not raise any errors when given correct arguments" do
         expect {
@@ -139,8 +139,8 @@ RSpec.describe "MiniType Integration" do
       it "logs a warning when given incorrect arguments" do
         AmazingClass.safe_render(123)
 
-        expect(MiniType.logger).to have_received(:warn).with(
-          "MiniType::IncorrectArgumentType: Expected argument ':thing' to be a 'String', but got 'Integer'"
+        expect(TinyType.logger).to have_received(:warn).with(
+          "TinyType::IncorrectArgumentType: Expected argument ':thing' to be a 'String', but got 'Integer'"
         )
       end
     end

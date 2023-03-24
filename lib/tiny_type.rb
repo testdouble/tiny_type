@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-require_relative "mini_type/version"
+require_relative "tiny_type/version"
 require "logger"
 
-module MiniType
-  class MiniTypeError < StandardError; end
+module TinyType
+  class TinyTypeError < StandardError; end
 
-  class IncorrectArgumentType < MiniTypeError; end
+  class IncorrectArgumentType < TinyTypeError; end
 
-  class UndeclaredArgument < MiniTypeError; end
+  class UndeclaredArgument < TinyTypeError; end
 
   VALID_MODES = [:raise, :warn]
 
@@ -33,7 +33,7 @@ module MiniType
   @logger = Logger.new($stderr)
 
   def self.mode=(mode)
-    raise "MiniType.mode must be one of #{VALID_MODES.inspect}" unless VALID_MODES.include?(mode)
+    raise "TinyType.mode must be one of #{VALID_MODES.inspect}" unless VALID_MODES.include?(mode)
     @mode = mode
   end
 
@@ -42,7 +42,7 @@ module MiniType
   end
 
   def self.logger=(logger)
-    raise "MiniType.logger expects an object that responds to :warn" unless logger.respond_to?(:warn)
+    raise "TinyType.logger expects an object that responds to :warn" unless logger.respond_to?(:warn)
     @logger = logger
   end
 
@@ -58,7 +58,7 @@ module MiniType
     elsif mode_override == :warn
       logger.warn("#{exception_class.name}: #{message}")
     else
-      raise "Unknown notification mode for MiniType, expected one of #{VALID_MODES.inspect} but got #{mode_override.inspect}"
+      raise "Unknown notification mode for TinyType, expected one of #{VALID_MODES.inspect} but got #{mode_override.inspect}"
     end
   end
 
@@ -71,7 +71,7 @@ module MiniType
 
       undeclared_arguments = context.local_variables - declaration.keys
       unless undeclared_arguments.empty?
-        MiniType.notify(
+        TinyType.notify(
           mode_override: mode_override,
           exception_class: UndeclaredArgument,
           message: "Undeclared arguments: #{undeclared_arguments.inspect}"
@@ -85,10 +85,10 @@ module MiniType
           allowable_type.call(mode_override: mode_override, argument_name: argument_name, argument_value: argument_value)
         elsif allowable_type.is_a?(Array)
           next if allowable_type.include?(argument_value.class)
-          MiniType.notify(mode_override: mode_override, message: "Expected argument ':#{argument_name}' to be a '#{allowable_type}', but got '#{argument_value.class.name}'")
+          TinyType.notify(mode_override: mode_override, message: "Expected argument ':#{argument_name}' to be a '#{allowable_type}', but got '#{argument_value.class.name}'")
         elsif allowable_type.is_a?(Class)
           next if argument_value.is_a?(allowable_type)
-          MiniType.notify(mode_override: mode_override, message: "Expected argument ':#{argument_name}' to be a '#{allowable_type}', but got '#{argument_value.class.name}'")
+          TinyType.notify(mode_override: mode_override, message: "Expected argument ':#{argument_name}' to be a '#{allowable_type}', but got '#{argument_value.class.name}'")
         else
           raise(IncorrectArgumentType, INVALID_TYPE % [argument_name])
         end
@@ -98,7 +98,7 @@ module MiniType
     def array_of(*allowed_classes)
       ->(mode_override:, argument_name:, argument_value:) {
         unless argument_value.is_a?(Array)
-          return MiniType.notify(
+          return TinyType.notify(
             mode_override: mode_override,
             message: "Expected an Array to be passed as argument `:#{argument_name}`, but got `#{argument_value.inspect}`"
           )
@@ -107,7 +107,7 @@ module MiniType
         actual_classes = argument_value.map(&:class).uniq
         return if actual_classes.map(&:name).sort == allowed_classes.map(&:name).sort
 
-        MiniType.notify(
+        TinyType.notify(
           mode_override: mode_override,
           message: "Expected array passed as argument `:#{argument_name}` to contain only `#{allowed_classes}`, but got `#{actual_classes}`"
         )
@@ -117,7 +117,7 @@ module MiniType
     def hash_with(*expected_keys)
       ->(mode_override:, argument_name:, argument_value:) {
         unless argument_value.is_a?(Hash)
-          return MiniType.notify(
+          return TinyType.notify(
             mode_override: nil,
             message: "Expected a Hash to be passed as argument `:#{argument_name}`, but got `#{argument_value.inspect}`"
           )
@@ -126,7 +126,7 @@ module MiniType
         expected_keys.each do |key|
           next if argument_value.has_key?(key)
 
-          MiniType.notify(
+          TinyType.notify(
             mode_override: mode_override,
             message: "Expected hash passed as argument `:#{argument_name}` to have key `#{key.inspect}`, but it did not"
           )
@@ -139,7 +139,7 @@ module MiniType
         must_respond_to.each do |method_name|
           next if argument_value.respond_to?(method_name)
 
-          MiniType.notify(
+          TinyType.notify(
             mode_override: mode_override,
             message: "Expected object passed as argument `:#{argument_name}` to respond to `.#{method_name}`, but it did not"
           )

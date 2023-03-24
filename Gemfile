@@ -2,5 +2,5 @@
 
 source "https://rubygems.org"
 
-# Specify your gem's dependencies in mini_type.gemspec
+# Specify your gem's dependencies in tiny_type.gemspec
 gemspec

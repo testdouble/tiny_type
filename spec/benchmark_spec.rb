@@ -1,7 +1,7 @@
 require "spec_helper"
 
 class BenchmarkTestClass
-  include MiniType
+  include TinyType
 
   def self.method_using_accepts(foo:, bar:)
     accepts { {foo: Integer, bar: [String, NilClass]} }
@@ -15,7 +15,7 @@ end
 
 BENCHMARK_ITERATION_COUNT = 1_000_000
 
-RSpec.describe MiniType do
+RSpec.describe TinyType do
   before(:all) do
     @benchmarks = {}
   end
@@ -28,8 +28,8 @@ RSpec.describe MiniType do
   end
 
   describe "benchmark" do
-    it "benchmarks MiniType.accepts" do
-      @benchmarks["typed method call using MiniType.accepts"] = Benchmark.measure do
+    it "benchmarks TinyType.accepts" do
+      @benchmarks["typed method call using TinyType.accepts"] = Benchmark.measure do
         BENCHMARK_ITERATION_COUNT.times do |id|
           BenchmarkTestClass.method_using_accepts(foo: 123, bar: "123")
         end

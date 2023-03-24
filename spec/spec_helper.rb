@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "mini_type"
+require "tiny_type"
 require "benchmark"
 require "ruby-prof"
 require "stringio"

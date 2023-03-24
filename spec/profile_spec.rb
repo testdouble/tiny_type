@@ -1,7 +1,7 @@
 require "spec_helper"
 
 class ProfileTestClass
-  include MiniType
+  include TinyType
 
   def self.typed_method(foo:, bar:, baz:)
     accepts { {foo: String, bar: [Integer, Float], baz: Array} }
@@ -11,9 +11,9 @@ end
 
 PROFILE_ITERATION_COUNT = 100_000
 
-RSpec.describe MiniType do
+RSpec.describe TinyType do
   describe "profile" do
-    it "profiles MiniType.accepts" do
+    it "profiles TinyType.accepts" do
       profile = RubyProf.profile do
         PROFILE_ITERATION_COUNT.times do
           ProfileTestClass.typed_method(foo: "abc", bar: 123, baz: [1, 2, 3])

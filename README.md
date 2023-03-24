@@ -1,24 +1,24 @@
 [![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
-[![build](https://github.com/testdouble/mini_type/actions/workflows/main.yml/badge.svg)](https://github.com/testdouble/mini_type/actions/workflows/main.yml)
-[![license](https://img.shields.io/github/license/testdouble/mini_type)](https://github.com/testdouble/mini_type/blob/main/LICENSE.txt)
+[![build](https://github.com/testdouble/tiny_type/actions/workflows/main.yml/badge.svg)](https://github.com/testdouble/tiny_type/actions/workflows/main.yml)
+[![license](https://img.shields.io/github/license/testdouble/tiny_type)](https://github.com/testdouble/tiny_type/blob/main/LICENSE.txt)
 
-# MiniType
+# TinyType
 
-MiniType is a small runtime type checking system for Ruby. MiniType does not require any setup other than installing the gem, and adding `accepts` definitions to your methods.
+TinyType is a small runtime type checking system for Ruby. TinyType does not require any setup other than installing the gem, and adding `accepts` definitions to your methods.
 
 ## Quick Start
 
 ```ruby
-require "mini_type"
+require "tiny_type"
 
 # Optional setup, this should be done once
 # in a config file or similar for your app
-MiniType.mode = :raise # set to :raise or :warn, defaults to :raise
-MiniType.logger = Rails.logger # when using :warn set the logger to your application's logger
+TinyType.mode = :raise # set to :raise or :warn, defaults to :raise
+TinyType.logger = Rails.logger # when using :warn set the logger to your application's logger
 
 class AmazingClass
-  # include MiniType in your class
-  include MiniType
+  # include TinyType in your class
+  include TinyType
 
   def initialize(param1, param2 = nil)
     accepts {{ param1: String, param2: [Integer, NilClass] }}
@@ -58,15 +58,15 @@ end
 
 Install the gem and add to the application's Gemfile by executing:
 
-    $ bundle add mini_type
+    $ bundle add tiny_type
 
 If bundler is not being used to manage dependencies, install the gem by executing:
 
-    $ gem install mini_type
+    $ gem install tiny_type
 
 ## Why?
 
-Having worked in both typed and untyped langauges I find myself loving the flexibility and clarity of Ruby, but missing the guidance that typing gives you when trying to understand a large or complex codebase. MiniType is designed to help document how methods are expected to be used, as well as providing an easy way to provide runtime guarding against unexpected input. For example, given this method:
+Having worked in both typed and untyped langauges I find myself loving the flexibility and clarity of Ruby, but missing the guidance that typing gives you when trying to understand a large or complex codebase. TinyType is designed to help document how methods are expected to be used, as well as providing an easy way to provide runtime guarding against unexpected input. For example, given this method:
 
 ```ruby
 def add_one(input)
@@ -82,7 +82,7 @@ def render(input)
 end
 ```
 
-MiniType makes it easy to document and enforce expectations in your code:
+TinyType makes it easy to document and enforce expectations in your code:
 
 ```ruby
 def render(input)
@@ -101,16 +101,16 @@ Expected argument ':input' to be of type 'RenderableObject', but got 'String'
 
 ```ruby
 # raise an exception whenever arguments do not match declarations
-MiniType.mode = :raise
+TinyType.mode = :raise
 
 # log a warning whenever arguments do not match declarations
-MiniType.mode = :warn
+TinyType.mode = :warn
 
-# customize where MiniType warnings are logged
+# customize where TinyType warnings are logged
 # accepts any object that reponds to :warn
-MiniType.logger = Rails.logger
-MiniType.logger = Logger.new($stderr)
-MiniType.logger = Log4r::Logger.new("Application Log")
+TinyType.logger = Rails.logger
+TinyType.logger = Logger.new($stderr)
+TinyType.logger = Log4r::Logger.new("Application Log")
 ```
 
 ## Type declarations:
@@ -181,7 +181,7 @@ accepts {{ }} # block that returns empty hash
 # => Value: 1
 ```
 
-The nice thing about this is it allows `MiniType` to be implemented in a really simple way with no 'magic'! 🎉
+The nice thing about this is it allows `TinyType` to be implemented in a really simple way with no 'magic'! 🎉
 
 
 ## Development
@@ -192,7 +192,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/testdouble/mini_type. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/testdouble/mini_type/blob/main/CODE_OF_CONDUCT.md).
+Bug reports and pull requests are welcome on GitHub at https://github.com/testdouble/tiny_type. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/testdouble/tiny_type/blob/main/CODE_OF_CONDUCT.md).
 
 ## License
 
@@ -200,4 +200,4 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct
 
-Everyone interacting in the MiniType project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/testdouble/mini_type/blob/main/CODE_OF_CONDUCT.md).
+Everyone interacting in the TinyType project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/testdouble/tiny_type/blob/main/CODE_OF_CONDUCT.md).

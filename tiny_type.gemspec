@@ -1,23 +1,23 @@
 # frozen_string_literal: true
 
-require_relative "lib/mini_type/version"
+require_relative "lib/tiny_type/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "mini_type"
-  spec.version = MiniType::VERSION
+  spec.name = "tiny_type"
+  spec.version = TinyType::VERSION
   spec.authors = ["Aaron Gough"]
   spec.email = ["aaron.gough@testdouble.com"]
 
   spec.summary = "Simple runtime type checking for Ruby"
   spec.description = "Simple runtime type checking for Ruby"
-  spec.homepage = "http://github.com/testdouble/mini_type"
+  spec.homepage = "http://github.com/testdouble/tiny_type"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 2.6.0"
 
   spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
 
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "http://github.com/testdouble/mini_type"
+  spec.metadata["source_code_uri"] = "http://github.com/testdouble/tiny_type"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
