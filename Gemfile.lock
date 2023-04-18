@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     tiny_type (0.1.0)
+      parser
 
 GEM
   remote: https://rubygems.org/

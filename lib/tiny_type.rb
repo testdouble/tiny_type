@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "tiny_type/version"
+require_relative "tiny_type/rspec_matchers"
 require "logger"
 
 module TinyType

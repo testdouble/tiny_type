@@ -130,6 +130,37 @@ accepts(:warn) {{ arg1: String }}
 accepts(:raise) {{ arg1: String }}
 ```
 
+## Testing
+
+Because the TinyType API is declarative, and the type matchers themselves are tested as part of the TinyType project, there's no real need to test your type declarations. Instead it's better practice to simply assert that a particular method uses TinyType to define/guard its inputs. TinyType provides custom RSpec matchers to make this easy:
+
+```ruby
+RSpec.describe Foo do
+  # assert that the initializer for a class declares input types
+  it { expect(described_class).to declare_input_types_for_initializer }
+
+  # assert that an instance method declares input types
+  it { expect(described_class).to declare_input_types_for_instance_method(:instance_method_foo) }
+
+  # assert that a class method declares input types
+  it { expect(described_class).to declare_input_types_for_class_method(:class_method_foo) }
+
+  # assert that ALL methods within a class declare input types
+  # if you want to make sure that an entire class uses TinyType
+  # this is the simplest way
+  it { expect(described_class).to declare_input_types_for_all_methods }
+end
+```
+
+To enable TinyType's custom matchers in your project, simply include them in your RSpec configuration like so:
+
+```ruby
+RSpec.configure do |config|
+  # add this line
+  config.include TinyType::RSpecMatchers
+end
+```
+
 ## How it works
 
 The `accepts` method takes a mode and a block as its arguments, the block should return a hash containing the local variables you want to check. This can be expressed in two ways:
@@ -170,6 +201,26 @@ accepts {{ }} # block that returns empty hash
 
 The nice thing about this is it allows `TinyType` to be implemented in a really simple way with no 'magic'! 🎉
 
+## Quirks and features
+
+The `accepts` method inspects *all* local variables at the point at which it's invoked, it is not limited to being used at the top of a method declaration:
+
+```ruby
+include TinyType
+
+foo = :foo
+bar = :bar
+
+accepts {{ foo: String }}
+
+#=> Undeclared arguments: [:bar, :_]
+```
+
+TinyType is not really intended to be used this way, but perhaps using it this way has some value that I haven't thought of yet? Submit a PR with documentation changes if you use TinyType in a new and interesting way!
+
+## Downsides
+
+The only downside to using TinyType is that it does add a small amount of overhead to each method call that uses it to declare input types. This overhead is very small and you won't notice it when used alongside a method body that does any amount of 'real work', but you may find it unacceptable in a code-path that is frequently called and otherwise very light-wight. There are profiling and benchmarking operations that run as part of TinyType's test suite, and PRs that improve performance are welcome! 
 
 ## Development
 
