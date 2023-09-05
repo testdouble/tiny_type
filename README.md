@@ -4,7 +4,7 @@
 
 # TinyType
 
-TinyType is a small runtime type checking system for Ruby. TinyType does not require any setup other than installing the gem, and adding `accepts` definitions to your methods.
+TinyType is a small type guarding system for Ruby. TinyType does not require any setup other than installing the gem, and adding `accepts` definitions to your methods.
 
 ## Quick Start
 
@@ -20,7 +20,7 @@ class AmazingClass
 
   def print_name(name:)
     accepts {{ name: String }}
-  end
+  end.returns { NilClass }
 
   def self.output_array(array)
     accepts {{ array: array_of(String, NilClass) }}
@@ -172,13 +172,11 @@ end
 
 # or the preferred style:
 accepts(:raise) {{ foo: String }}
-
 ```
 
 In Ruby blocks capture information about the context in which they were defined. This allows us to inspect variables that were local to the block when it was defined like so:
 
 ```ruby
-
 def accepts(mode, &block)
   context = block.binding
   context.local_variables.each do |name|
