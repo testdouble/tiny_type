@@ -20,7 +20,7 @@ class AmazingClass
 
   def print_name(name:)
     accepts {{ name: String }}
-  end.returns { NilClass }
+  end
 
   def self.output_array(array)
     accepts {{ array: array_of(String, NilClass) }}
